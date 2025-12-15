@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MADFAM Strategy Center</title>
+    <title>MADFAM Centro de Estrategia</title>
     
     <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -47,9 +47,9 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useMemo } = React;
 
-        // --- Icons (Embedded SVGs for single-file reliability) ---
+        // --- Icons ---
         
         const IconWrapper = ({ children, size = 24, className = "" }) => (
             <svg 
@@ -71,125 +71,294 @@
         const Zap = (props) => <IconWrapper {...props}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></IconWrapper>;
         const CheckCircle = (props) => <IconWrapper {...props}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></IconWrapper>;
         const AlertTriangle = (props) => <IconWrapper {...props}><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></IconWrapper>;
-        // We only really need Zap, CheckCircle and AlertTriangle for the UI logic, 
-        // the rest are used as emoji in the data or UI.
+        const Globe = (props) => <IconWrapper {...props}><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></IconWrapper>;
 
-        // --- Data ---
+        // --- Bilingual Data Store ---
 
-        const strategyData = {
-            urgent: [
-                {
-                    title: 'The "Golden Ticket" (Cédula de Validación)',
-                    icon: '🎫',
-                    what: 'Certificate from SDEyT Morelos.',
-                    why: 'Unlocks ~14.75% fixed rate. Without it, you pay ~25%.',
-                    action: 'Go to SDEyT in Cuernavaca ASAP.',
-                    deadline: 'December 31, 2025'
+        const CONTENT = {
+            es: {
+                meta: {
+                    appTitle: 'Innovaciones MADFAM',
+                    appSubtitle: 'Cuartel Estratégico 2025-2026',
+                    location: 'Morelos, MX',
+                    date: 'Finales 2025',
+                    tabGuide: 'Guía',
+                    tabCheck: 'Tareas',
+                    progressTitle: 'Plan de Acción',
+                    progressSub: 'El progreso se guarda automáticamente',
+                    amount: 'Monto',
+                    bestFor: 'Ideal Para',
+                    tip: 'Consejo',
+                    why: 'Por qué es crítico'
                 },
-                {
-                    title: 'Clean Bill of Health (32-D)',
-                    icon: '🩺',
-                    what: 'SAT Positive Compliance Opinion.',
-                    why: 'If negative (even 1 peso), NO government loans for you.',
-                    action: 'Download from SAT portal.',
-                    deadline: 'Immediate'
+                sections: {
+                    urgent: { title: 'Urgente: Diciembre', subtitle: '¡Antes de las fiestas!' },
+                    loans: { title: 'Créditos Estatales y Federales', subtitle: 'La deuda "buena"' },
+                    grants: { title: 'Dinero a Fondo Perdido', subtitle: 'Subsidios y Logística' },
+                    warnings: { title: 'Alertas Rojas', subtitle: 'No caigas en estafas' },
+                    forecast: { title: 'Pronóstico 2026', subtitle: 'Mirando al futuro' }
                 },
-                {
-                    title: 'RENIECYT Registration',
-                    icon: '🧬',
-                    what: 'Register for Tech/Innovation entities.',
-                    why: 'Required for the 30% Tax Credit in 2026.',
-                    action: 'Check status or register.',
-                    deadline: 'Before Feb 2026'
-                }
-            ],
-            loans: [
-                {
-                    title: 'Fondo Morelos "ProPyME Premium"',
-                    vibe: 'Best Rate (Slow)',
-                    amount: 'Up to $8,000,000 MXN',
-                    rate: 'Starts at 9.5% 📉',
-                    bestFor: 'Machinery, Construction.',
-                    catch: 'Requires Mortgage Guarantee.',
-                    color: 'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800'
+                data: {
+                    urgent: [
+                        {
+                            title: 'El Boleto Dorado (Cédula de Validación)',
+                            icon: '🎫',
+                            what: 'Certificado de SDEyT Morelos.',
+                            why: 'Desbloquea tasa fija ~14.75%. Sin ella, pagas ~25%.',
+                            action: 'Ir a SDEyT en Cuernavaca YA.',
+                            deadline: '31 de Diciembre, 2025'
+                        },
+                        {
+                            title: 'Opinión de Cumplimiento (32-D)',
+                            icon: '🩺',
+                            what: 'Opinión Positiva del SAT.',
+                            why: 'Si es negativa (aunque sea 1 peso), NO hay préstamos de gobierno.',
+                            action: 'Descargar del portal del SAT.',
+                            deadline: 'Inmediato'
+                        },
+                        {
+                            title: 'Registro RENIECYT',
+                            icon: '🧬',
+                            what: 'Registro para empresas de Tec/Innovación.',
+                            why: 'Requerido para el estímulo fiscal del 30% en 2026.',
+                            action: 'Verificar estatus o registrarse.',
+                            deadline: 'Antes de Feb 2026'
+                        }
+                    ],
+                    loans: [
+                        {
+                            title: 'Fondo Morelos "ProPyME Premium"',
+                            vibe: 'Mejor Tasa (Lento)',
+                            amount: 'Hasta $8,000,000 MXN',
+                            rate: 'Desde 9.5% 📉',
+                            bestFor: 'Maquinaria, Construcción.',
+                            catch: 'Requiere Garantía Hipotecaria.',
+                            color: 'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800'
+                        },
+                        {
+                            title: 'Programa "Fortalece"',
+                            vibe: 'Dinero Rápido ⚡',
+                            amount: '$10k - $150k MXN',
+                            rate: '12% (Pago Puntual)',
+                            bestFor: 'Aguinaldos, Inventario.',
+                            catch: 'Solo montos pequeños.',
+                            color: 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800'
+                        },
+                        {
+                            title: 'NAFIN "Impulso + Morelos"',
+                            vibe: 'El Crédito Grande 🏦',
+                            amount: 'Hasta $5,000,000 MXN',
+                            rate: 'Tope de 14.75% Fijo',
+                            bestFor: 'Capital de Trabajo, Expansión.',
+                            catch: 'Necesita la "Cédula" primero.',
+                            color: 'bg-purple-50 border-purple-200 dark:bg-purple-900/20 dark:border-purple-800'
+                        }
+                    ],
+                    grants: [
+                        {
+                            title: 'Estímulo Fiscal (EFIDT 2026)',
+                            icon: '🔬',
+                            reward: '30% Crédito Fiscal en gasto I+D.',
+                            strategy: 'Clasificar sueldos de ingeniería/prototipos como I+D.'
+                        },
+                        {
+                            title: 'Economía Social "Bienestar"',
+                            icon: '🤝',
+                            reward: 'Hasta $50k a Fondo Perdido.',
+                            note: 'Esperar convocatorias en Ene/Feb 2026.'
+                        },
+                        {
+                            title: 'Financiamiento Energía Verde',
+                            icon: '☀️',
+                            reward: 'Paneles Solares Subsidiados.',
+                            note: 'Nuevo para 2026. Esperar a Enero.'
+                        }
+                    ],
+                    logistics: [
+                        {
+                            title: 'FedEx x Secretaría de Economía',
+                            icon: '📦',
+                            detail: '40% de Descuento en envíos si tienes certificado "Hecho en México".'
+                        }
+                    ],
+                    warnings: [
+                        {
+                            title: 'NO des anticipos',
+                            detail: 'Si piden dinero para "seguros" o "apertura", es ESTAFA.',
+                            icon: '🚩'
+                        },
+                        {
+                            title: 'Revisa la URL',
+                            detail: 'Solo confía en sitios web que terminen en .gob.mx',
+                            icon: '🔗'
+                        },
+                        {
+                            title: 'Evita préstamos "Instantáneos"',
+                            detail: 'Si no revisan Buró, es un tiburón (interés >80%).',
+                            icon: '🦈'
+                        }
+                    ],
+                    forecast: [
+                        { title: '📈 Impuestos Arriba', text: 'Impuesto sobre nómina sube. Necesitas préstamos subsidiados para compensar.' },
+                        { title: '🏗️ Infraestructura', text: '"Plan México" mejorando corredores logísticos en Cuernavaca.' },
+                        { title: '⚽ Mundial', text: 'Retos de innovación por venir de Santander/Universidades.' }
+                    ]
                 },
-                {
-                    title: 'Program "Fortalece"',
-                    vibe: 'Quick Cash ⚡',
-                    amount: '$10k - $150k MXN',
-                    rate: '12% (Prompt Payment)',
-                    bestFor: 'Aguinaldos, Inventory.',
-                    catch: 'Smaller amounts only.',
-                    color: 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800'
+                todos: [
+                    { id: 1, phase: 'Fase 1: Urgente (Dic 13-31)', text: 'Validar Cumplimiento Fiscal (SAT 32-D Positiva)' },
+                    { id: 2, phase: 'Fase 1: Urgente (Dic 13-31)', text: 'Descargar Constancia de Situación Fiscal (<30 días)' },
+                    { id: 3, phase: 'Fase 1: Urgente (Dic 13-31)', text: 'IR A CUERNAVACA: Obtener "Cédula de Validación" SDEyT' },
+                    { id: 4, phase: 'Fase 1: Urgente (Dic 13-31)', text: 'Mensaje a Fondo Morelos (WhatsApp) sobre presupuesto' },
+                    { id: 5, phase: 'Fase 1: Urgente (Dic 13-31)', text: 'Verificar Estatus RENIECYT (para crédito fiscal)' },
+                    { id: 6, phase: 'Fase 2: Ejecución (Ene 2-31)', text: 'Meter solicitud al Banco (Impulso NAFIN) con Cédula' },
+                    { id: 7, phase: 'Fase 2: Ejecución (Ene 2-31)', text: 'Monitorear "Tierra y Libertad" reglas de Bienestar' },
+                    { id: 8, phase: 'Fase 2: Ejecución (Ene 2-31)', text: 'Preparar descripción técnica de proyecto para EFIDT' },
+                    { id: 9, phase: 'Control de Riesgos (Siempre)', text: 'Revisar consultores en CONDUSEF SIPRES' },
+                    { id: 10, phase: 'Control de Riesgos (Siempre)', text: 'Evitar Fintechs para maquinaria a largo plazo' },
+                ]
+            },
+            en: {
+                meta: {
+                    appTitle: 'MADFAM Innovations',
+                    appSubtitle: '2025-2026 Strategic Headquarters',
+                    location: 'Morelos, MX',
+                    date: 'Late 2025',
+                    tabGuide: 'Strategy',
+                    tabCheck: 'Checklist',
+                    progressTitle: 'Action Plan',
+                    progressSub: 'Progress saves automatically',
+                    amount: 'Amount',
+                    bestFor: 'Best For',
+                    tip: 'Tip',
+                    why: 'Why Critical'
                 },
-                {
-                    title: 'NAFIN "Impulso + Morelos"',
-                    vibe: 'The Big Commercial Loan 🏦',
-                    amount: 'Up to $5,000,000 MXN',
-                    rate: 'Capped at 14.75% Fixed',
-                    bestFor: 'Working Capital, Expansion.',
-                    catch: 'Needs the "Golden Ticket" (Cédula) first.',
-                    color: 'bg-purple-50 border-purple-200 dark:bg-purple-900/20 dark:border-purple-800'
-                }
-            ],
-            grants: [
-                {
-                    title: 'Fiscal Stimulus (EFIDT 2026)',
-                    icon: '🔬',
-                    reward: '30% Tax Credit on R&D spend.',
-                    strategy: 'Classify engineering salaries/prototypes as R&D.'
+                sections: {
+                    urgent: { title: 'Urgent: December', subtitle: 'Do this before holidays!' },
+                    loans: { title: 'State & Federal Loans', subtitle: 'The "Good" Debt' },
+                    grants: { title: 'Free Money & Perks', subtitle: 'Grants, Tax Credits & Logistics' },
+                    warnings: { title: 'Red Flags', subtitle: 'Do NOT get scammed' },
+                    forecast: { title: '2026 Forecast', subtitle: 'Looking ahead' }
                 },
-                {
-                    title: 'Social Economy "Bienestar"',
-                    icon: '🤝',
-                    reward: 'Up to $50k Grant (Free Money).',
-                    note: 'Watch for calls in Jan/Feb 2026.'
+                data: {
+                    urgent: [
+                        {
+                            title: 'The "Golden Ticket" (Cédula de Validación)',
+                            icon: '🎫',
+                            what: 'Certificate from SDEyT Morelos.',
+                            why: 'Unlocks ~14.75% fixed rate. Without it, you pay ~25%.',
+                            action: 'Go to SDEyT in Cuernavaca ASAP.',
+                            deadline: 'December 31, 2025'
+                        },
+                        {
+                            title: 'Clean Bill of Health (32-D)',
+                            icon: '🩺',
+                            what: 'SAT Positive Compliance Opinion.',
+                            why: 'If negative (even 1 peso), NO government loans for you.',
+                            action: 'Download from SAT portal.',
+                            deadline: 'Immediate'
+                        },
+                        {
+                            title: 'RENIECYT Registration',
+                            icon: '🧬',
+                            what: 'Register for Tech/Innovation entities.',
+                            why: 'Required for the 30% Tax Credit in 2026.',
+                            action: 'Check status or register.',
+                            deadline: 'Before Feb 2026'
+                        }
+                    ],
+                    loans: [
+                        {
+                            title: 'Fondo Morelos "ProPyME Premium"',
+                            vibe: 'Best Rate (Slow)',
+                            amount: 'Up to $8,000,000 MXN',
+                            rate: 'Starts at 9.5% 📉',
+                            bestFor: 'Machinery, Construction.',
+                            catch: 'Requires Mortgage Guarantee.',
+                            color: 'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800'
+                        },
+                        {
+                            title: 'Program "Fortalece"',
+                            vibe: 'Quick Cash ⚡',
+                            amount: '$10k - $150k MXN',
+                            rate: '12% (Prompt Payment)',
+                            bestFor: 'Aguinaldos, Inventory.',
+                            catch: 'Smaller amounts only.',
+                            color: 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800'
+                        },
+                        {
+                            title: 'NAFIN "Impulso + Morelos"',
+                            vibe: 'The Big Commercial Loan 🏦',
+                            amount: 'Up to $5,000,000 MXN',
+                            rate: 'Capped at 14.75% Fixed',
+                            bestFor: 'Working Capital, Expansion.',
+                            catch: 'Needs the "Golden Ticket" (Cédula) first.',
+                            color: 'bg-purple-50 border-purple-200 dark:bg-purple-900/20 dark:border-purple-800'
+                        }
+                    ],
+                    grants: [
+                        {
+                            title: 'Fiscal Stimulus (EFIDT 2026)',
+                            icon: '🔬',
+                            reward: '30% Tax Credit on R&D spend.',
+                            strategy: 'Classify engineering salaries/prototypes as R&D.'
+                        },
+                        {
+                            title: 'Social Economy "Bienestar"',
+                            icon: '🤝',
+                            reward: 'Up to $50k Grant (Free Money).',
+                            note: 'Watch for calls in Jan/Feb 2026.'
+                        },
+                        {
+                            title: 'Green Energy Financing',
+                            icon: '☀️',
+                            reward: 'Subsidized Solar Panels.',
+                            note: 'New for 2026. Wait for Jan launch to buy panels.'
+                        }
+                    ],
+                    logistics: [
+                        {
+                            title: 'FedEx x Secretary of Economy',
+                            icon: '📦',
+                            detail: '40% Discount on shipping if you have "Hecho en México" cert.'
+                        }
+                    ],
+                    warnings: [
+                        {
+                            title: 'NO Advance Deposits',
+                            detail: 'If they ask for money for "insurance" or "file opening", it is a SCAM.',
+                            icon: '🚩'
+                        },
+                        {
+                            title: 'Check the URL',
+                            detail: 'Only trust websites ending in .gob.mx',
+                            icon: '🔗'
+                        },
+                        {
+                            title: 'Avoid "Instant" Loans',
+                            detail: 'If they don\'t check Credit Bureau, it\'s a shark (80%+ interest).',
+                            icon: '🦈'
+                        }
+                    ],
+                    forecast: [
+                        { title: '📈 Taxes Up', text: 'State payroll tax increasing. Need subsidized loans to offset.' },
+                        { title: '🏗️ Infrastructure', text: '"Plan México" improving logistics corridors in Cuernavaca.' },
+                        { title: '⚽ World Cup', text: 'Innovation challenges coming from Santander/Universities.' }
+                    ]
                 },
-                {
-                    title: 'Green Energy Financing',
-                    icon: '☀️',
-                    reward: 'Subsidized Solar Panels.',
-                    note: 'New for 2026. Wait for Jan launch to buy panels.'
-                }
-            ],
-            logistics: [
-                {
-                    title: 'FedEx x Secretary of Economy',
-                    icon: '📦',
-                    detail: '40% Discount on shipping if you have "Hecho en México" cert.'
-                }
-            ],
-            warnings: [
-                {
-                    title: 'NO Advance Deposits',
-                    detail: 'If they ask for money for "insurance" or "file opening", it is a SCAM.',
-                    icon: '🚩'
-                },
-                {
-                    title: 'Check the URL',
-                    detail: 'Only trust websites ending in .gob.mx',
-                    icon: '🔗'
-                },
-                {
-                    title: 'Avoid "Instant" Loans',
-                    detail: 'If they don\'t check Credit Bureau, it\'s a shark (80%+ interest).',
-                    icon: '🦈'
-                }
-            ]
+                todos: [
+                    { id: 1, phase: 'Phase 1: Urgent (Dec 13-31)', text: 'Validate Tax Compliance (SAT 32-D Positive)' },
+                    { id: 2, phase: 'Phase 1: Urgent (Dec 13-31)', text: 'Download Constancia de Situación Fiscal (<30 days old)' },
+                    { id: 3, phase: 'Phase 1: Urgent (Dec 13-31)', text: 'GO TO CUERNAVACA: Get SDEyT "Cédula de Validación"' },
+                    { id: 4, phase: 'Phase 1: Urgent (Dec 13-31)', text: 'Message Fondo Morelos (WhatsApp) about leftover budget' },
+                    { id: 5, phase: 'Phase 1: Urgent (Dec 13-31)', text: 'Verify RENIECYT Status (for Innovation tax credit)' },
+                    { id: 6, phase: 'Phase 2: Execution (Jan 2-31)', text: 'Submit Bank Application (Impulso NAFIN) with Cédula' },
+                    { id: 7, phase: 'Phase 2: Execution (Jan 2-31)', text: 'Monitor "Tierra y Libertad" for Bienestar rules' },
+                    { id: 8, phase: 'Phase 2: Execution (Jan 2-31)', text: 'Prepare Technical Project description for EFIDT' },
+                    { id: 9, phase: 'Risk Control (Always)', text: 'Check consultants against CONDUSEF SIPRES' },
+                    { id: 10, phase: 'Risk Control (Always)', text: 'Avoid Fintech loans for long-term machines' },
+                ]
+            }
         };
-
-        const initialTodoList = [
-            { id: 1, phase: 'Phase 1: Urgent (Dec 13-31)', text: 'Validate Tax Compliance (SAT 32-D Positive)', done: false },
-            { id: 2, phase: 'Phase 1: Urgent (Dec 13-31)', text: 'Download Constancia de Situación Fiscal (<30 days old)', done: false },
-            { id: 3, phase: 'Phase 1: Urgent (Dec 13-31)', text: 'GO TO CUERNAVACA: Get SDEyT "Cédula de Validación"', done: false },
-            { id: 4, phase: 'Phase 1: Urgent (Dec 13-31)', text: 'Message Fondo Morelos (WhatsApp) about leftover budget', done: false },
-            { id: 5, phase: 'Phase 1: Urgent (Dec 13-31)', text: 'Verify RENIECYT Status (for Innovation tax credit)', done: false },
-            { id: 6, phase: 'Phase 2: Execution (Jan 2-31)', text: 'Submit Bank Application (Impulso NAFIN) with Cédula', done: false },
-            { id: 7, phase: 'Phase 2: Execution (Jan 2-31)', text: 'Monitor "Tierra y Libertad" for Bienestar rules', done: false },
-            { id: 8, phase: 'Phase 2: Execution (Jan 2-31)', text: 'Prepare Technical Project description for EFIDT', done: false },
-            { id: 9, phase: 'Risk Control (Always)', text: 'Check consultants against CONDUSEF SIPRES', done: false },
-            { id: 10, phase: 'Risk Control (Always)', text: 'Avoid Fintech loans for long-term machines', done: false },
-        ];
 
         // --- Components ---
 
@@ -215,13 +384,26 @@
             </div>
         );
 
+        const LangToggle = ({ lang, setLang, className = "" }) => (
+            <button 
+                onClick={() => setLang(lang === 'es' ? 'en' : 'es')}
+                className={`flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-bold transition-all ${className}`}
+            >
+                <Globe size={16} />
+                <span>{lang === 'es' ? 'ES' : 'EN'}</span>
+            </button>
+        );
+
         // --- Main App ---
 
         function App() {
+            const [lang, setLang] = useState('es'); // Default to Spanish
             const [activeTab, setActiveTab] = useState('guide');
-            const [todos, setTodos] = useState(initialTodoList);
-            const [progress, setProgress] = useState(0);
+            const [completedIds, setCompletedIds] = useState([]);
             const [isDarkMode, setIsDarkMode] = useState(false);
+
+            // Derived content based on language
+            const T = CONTENT[lang];
 
             // Auto-detect system theme
             useEffect(() => {
@@ -235,45 +417,58 @@
                 }
             }, []);
 
-            // Load state from local storage on mount
+            // Load completion state from local storage (ONLY IDs)
             useEffect(() => {
-                const savedTodos = localStorage.getItem('madfam_todos');
-                if (savedTodos) {
-                    setTodos(JSON.parse(savedTodos));
+                const savedProgress = localStorage.getItem('madfam_progress');
+                if (savedProgress) {
+                    setCompletedIds(JSON.parse(savedProgress));
                 }
             }, []);
 
-            // Update progress whenever todos change
+            // Save progress
             useEffect(() => {
-                const completed = todos.filter(t => t.done).length;
-                const total = todos.length;
-                setProgress(Math.round((completed / total) * 100));
-                localStorage.setItem('madfam_todos', JSON.stringify(todos));
-            }, [todos]);
+                localStorage.setItem('madfam_progress', JSON.stringify(completedIds));
+            }, [completedIds]);
+
+            const progress = useMemo(() => {
+                if (!T.todos.length) return 0;
+                return Math.round((completedIds.length / T.todos.length) * 100);
+            }, [completedIds, T.todos.length]);
 
             const toggleTodo = (id) => {
-                setTodos(todos.map(t => t.id === id ? { ...t, done: !t.done } : t));
+                if (completedIds.includes(id)) {
+                    setCompletedIds(completedIds.filter(cId => cId !== id));
+                } else {
+                    setCompletedIds([...completedIds, id]);
+                }
             };
 
             const GuideView = () => (
                 <div className="space-y-4 pb-24 animate-in fade-in duration-500">
                     
                     {/* Introduction Card */}
-                    <Card className="bg-gradient-to-br from-indigo-600 to-purple-700 text-white border-none dark:from-indigo-900 dark:to-purple-950">
-                        <h1 className="text-3xl font-extrabold mb-2">Innovaciones MADFAM</h1>
-                        <p className="text-indigo-100 font-medium text-lg">
-                            2025-2026 Strategic Headquarters
-                        </p>
-                        <div className="mt-4 flex flex-wrap gap-2">
-                            <Badge color="bg-white/20 text-white">Morelos, MX</Badge>
-                            <Badge color="bg-white/20 text-white">Late 2025</Badge>
+                    <Card className="bg-gradient-to-br from-indigo-600 to-purple-700 text-white border-none dark:from-indigo-900 dark:to-purple-950 relative overflow-hidden">
+                        <div className="relative z-10">
+                            <div className="flex justify-between items-start mb-4">
+                                <Badge color="bg-white/20 text-white backdrop-blur-md">{T.meta.date}</Badge>
+                                <LangToggle lang={lang} setLang={setLang} />
+                            </div>
+                            <h1 className="text-3xl font-extrabold mb-2">{T.meta.appTitle}</h1>
+                            <p className="text-indigo-100 font-medium text-lg">
+                                {T.meta.appSubtitle}
+                            </p>
+                            <div className="mt-4 flex flex-wrap gap-2">
+                                <Badge color="bg-indigo-500/50 text-white border border-indigo-400/30">{T.meta.location}</Badge>
+                            </div>
                         </div>
+                        {/* Abstract blob for decoration */}
+                        <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-purple-500/30 rounded-full blur-3xl"></div>
                     </Card>
 
                     {/* URGENT SECTION */}
-                    <SectionHeader icon="🚨" title="Urgent: December" subtitle="Do this before holidays!" />
+                    <SectionHeader icon="🚨" title={T.sections.urgent.title} subtitle={T.sections.urgent.subtitle} />
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                        {strategyData.urgent.map((item, idx) => (
+                        {T.data.urgent.map((item, idx) => (
                             <Card key={idx} className="border-l-8 border-l-red-500 bg-red-50/50 dark:bg-red-900/10 dark:border-l-red-600">
                                 <div className="flex justify-between items-start">
                                     <span className="text-4xl mb-3 block">{item.icon}</span>
@@ -282,7 +477,7 @@
                                 <h3 className="font-bold text-xl text-slate-900 dark:text-slate-100 leading-tight mb-2">{item.title}</h3>
                                 <p className="text-sm text-slate-700 dark:text-slate-300 font-semibold mb-2">{item.what}</p>
                                 <div className="bg-white/60 dark:bg-black/20 p-3 rounded-lg border border-red-100 dark:border-red-900/50">
-                                    <p className="text-xs font-bold text-red-600 dark:text-red-400 uppercase mb-1">Why Critical:</p>
+                                    <p className="text-xs font-bold text-red-600 dark:text-red-400 uppercase mb-1">{T.meta.why}:</p>
                                     <p className="text-sm text-slate-700 dark:text-slate-300">{item.why}</p>
                                 </div>
                             </Card>
@@ -290,9 +485,9 @@
                     </div>
 
                     {/* MONEY SECTION */}
-                    <SectionHeader icon="💰" title="State & Federal Loans" subtitle="The 'Good' Debt" />
+                    <SectionHeader icon="💰" title={T.sections.loans.title} subtitle={T.sections.loans.subtitle} />
                     <div className="space-y-4">
-                        {strategyData.loans.map((loan, idx) => (
+                        {T.data.loans.map((loan, idx) => (
                             <Card key={idx} className={`${loan.color} transition-transform active:scale-[0.98]`}>
                                 <div className="flex justify-between items-start mb-2">
                                     <Badge color="bg-white/80 dark:bg-black/20 shadow-sm text-slate-800 dark:text-slate-200">{loan.vibe}</Badge>
@@ -301,11 +496,11 @@
                                 <h3 className="text-2xl font-black text-slate-900 dark:text-slate-100 mb-2">{loan.title}</h3>
                                 <div className="grid grid-cols-2 gap-2 text-sm">
                                     <div className="bg-white/60 dark:bg-black/20 p-2 rounded">
-                                        <p className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold">Amount</p>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold">{T.meta.amount}</p>
                                         <p className="font-bold text-slate-800 dark:text-slate-200">{loan.amount}</p>
                                     </div>
                                     <div className="bg-white/60 dark:bg-black/20 p-2 rounded">
-                                        <p className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold">Best For</p>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold">{T.meta.bestFor}</p>
                                         <p className="font-bold text-slate-800 dark:text-slate-200">{loan.bestFor}</p>
                                     </div>
                                 </div>
@@ -320,9 +515,9 @@
                     </div>
 
                     {/* GRANTS SECTION */}
-                    <SectionHeader icon="🎁" title="Free Money & Perks" subtitle="Grants, Tax Credits & Logistics" />
+                    <SectionHeader icon="🎁" title={T.sections.grants.title} subtitle={T.sections.grants.subtitle} />
                     <div className="grid gap-4 md:grid-cols-2">
-                        {strategyData.grants.map((grant, idx) => (
+                        {T.data.grants.map((grant, idx) => (
                             <Card key={idx}>
                                 <div className="flex items-center gap-3 mb-3">
                                     <span className="text-3xl bg-indigo-50 dark:bg-indigo-900/30 p-2 rounded-lg">{grant.icon}</span>
@@ -331,7 +526,7 @@
                                 <p className="text-slate-600 dark:text-slate-300 mb-3">{grant.reward}</p>
                                 {grant.strategy && (
                                     <div className="bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 text-sm p-3 rounded-lg font-medium">
-                                        💡 Tip: {grant.strategy}
+                                        💡 {T.meta.tip}: {grant.strategy}
                                     </div>
                                 )}
                                 {grant.note && (
@@ -341,7 +536,7 @@
                                 )}
                             </Card>
                         ))}
-                        {strategyData.logistics.map((item, idx) => (
+                        {T.data.logistics.map((item, idx) => (
                             <Card key={`log-${idx}`}>
                                 <div className="flex items-center gap-3 mb-3">
                                     <span className="text-3xl bg-orange-50 dark:bg-orange-900/20 p-2 rounded-lg">{item.icon}</span>
@@ -353,9 +548,9 @@
                     </div>
 
                     {/* RED FLAGS */}
-                    <SectionHeader icon="🚫" title="Red Flags" subtitle="Do NOT get scammed" />
+                    <SectionHeader icon="🚫" title={T.sections.warnings.title} subtitle={T.sections.warnings.subtitle} />
                     <div className="space-y-3">
-                        {strategyData.warnings.map((warn, idx) => (
+                        {T.data.warnings.map((warn, idx) => (
                             <div key={idx} className="bg-red-50 dark:bg-red-900/20 border-2 border-red-100 dark:border-red-900 rounded-xl p-4 flex items-start gap-4">
                                 <span className="text-3xl">{warn.icon}</span>
                                 <div>
@@ -367,72 +562,79 @@
                     </div>
 
                     {/* FUTURE */}
-                    <SectionHeader icon="🔮" title="2026 Forecast" subtitle="Looking ahead" />
+                    <SectionHeader icon="🔮" title={T.sections.forecast.title} subtitle={T.sections.forecast.subtitle} />
                     <div className="grid gap-3 grid-cols-1 md:grid-cols-3 mb-8">
-                        <div className="bg-slate-100 dark:bg-slate-800 p-4 rounded-xl">
-                            <h4 className="font-bold text-slate-700 dark:text-slate-200 mb-1">📈 Taxes Up</h4>
-                            <p className="text-sm text-slate-600 dark:text-slate-400">State payroll tax increasing. Need subsidized loans to offset.</p>
-                        </div>
-                        <div className="bg-slate-100 dark:bg-slate-800 p-4 rounded-xl">
-                            <h4 className="font-bold text-slate-700 dark:text-slate-200 mb-1">🏗️ Infrastructure</h4>
-                            <p className="text-sm text-slate-600 dark:text-slate-400">"Plan México" improving logistics corridors in Cuernavaca.</p>
-                        </div>
-                        <div className="bg-slate-100 dark:bg-slate-800 p-4 rounded-xl">
-                            <h4 className="font-bold text-slate-700 dark:text-slate-200 mb-1">⚽ World Cup</h4>
-                            <p className="text-sm text-slate-600 dark:text-slate-400">Innovation challenges coming from Santander/Universities.</p>
-                        </div>
-                    </div>
-                </div>
-            );
-
-            const ChecklistView = () => (
-                <div className="pb-24 animate-in slide-in-from-right duration-300">
-                    
-                    <Card className="bg-indigo-900 dark:bg-indigo-950 text-white mb-6 sticky top-0 z-10 shadow-lg border-indigo-800">
-                        <div className="flex justify-between items-end mb-2">
-                            <h2 className="text-2xl font-bold">Action Plan</h2>
-                            <span className="text-2xl font-mono font-bold text-green-400">{progress}%</span>
-                        </div>
-                        <div className="w-full bg-indigo-950 dark:bg-black/50 rounded-full h-3">
-                            <div 
-                                className="bg-green-400 h-3 rounded-full transition-all duration-500 ease-out" 
-                                style={{ width: `${progress}%` }}
-                            />
-                        </div>
-                        <p className="text-xs text-indigo-300 mt-2 text-center">Progress saves automatically</p>
-                    </Card>
-
-                    <div className="space-y-2">
-                        {['Phase 1: Urgent (Dec 13-31)', 'Phase 2: Execution (Jan 2-31)', 'Risk Control (Always)'].map((phaseTitle) => (
-                            <div key={phaseTitle} className="mb-6">
-                                <h3 className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3 px-1">{phaseTitle}</h3>
-                                {todos.filter(t => t.phase === phaseTitle).map((todo) => (
-                                    <div 
-                                        key={todo.id}
-                                        onClick={() => toggleTodo(todo.id)}
-                                        className={`
-                                            group flex items-start gap-4 p-4 mb-3 rounded-xl border-2 cursor-pointer transition-all duration-200
-                                            ${todo.done 
-                                                ? 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700/50 opacity-60' 
-                                                : 'bg-white dark:bg-slate-800 border-indigo-100 dark:border-slate-700 hover:border-indigo-400 dark:hover:border-indigo-500 shadow-sm'}
-                                        `}
-                                    >
-                                        <div className={`
-                                            mt-1 w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors
-                                            ${todo.done ? 'bg-green-500 border-green-500' : 'bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600 group-hover:border-indigo-400'}
-                                        `}>
-                                            {todo.done && <CheckCircle size={16} className="text-white" />}
-                                        </div>
-                                        <p className={`text-lg font-medium leading-snug select-none ${todo.done ? 'line-through text-slate-500 dark:text-slate-500' : 'text-slate-800 dark:text-slate-200'}`}>
-                                            {todo.text}
-                                        </p>
-                                    </div>
-                                ))}
+                        {T.data.forecast.map((item, idx) => (
+                             <div key={idx} className="bg-slate-100 dark:bg-slate-800 p-4 rounded-xl">
+                                <h4 className="font-bold text-slate-700 dark:text-slate-200 mb-1">{item.title}</h4>
+                                <p className="text-sm text-slate-600 dark:text-slate-400">{item.text}</p>
                             </div>
                         ))}
                     </div>
                 </div>
             );
+
+            const ChecklistView = () => {
+                // Group todos by phase for display
+                const phases = [...new Set(T.todos.map(t => t.phase))];
+
+                return (
+                    <div className="pb-24 animate-in slide-in-from-right duration-300">
+                        
+                        <Card className="bg-indigo-900 dark:bg-indigo-950 text-white mb-6 sticky top-0 z-10 shadow-lg border-indigo-800">
+                            <div className="flex justify-between items-start mb-2">
+                                <div>
+                                    <h2 className="text-2xl font-bold">{T.meta.progressTitle}</h2>
+                                    <p className="text-xs text-indigo-300 mt-1">{T.meta.progressSub}</p>
+                                </div>
+                                <div className="flex flex-col items-end gap-2">
+                                    <span className="text-2xl font-mono font-bold text-green-400">{progress}%</span>
+                                    <LangToggle lang={lang} setLang={setLang} className="!bg-indigo-800/50 !text-indigo-100 !text-xs !py-1" />
+                                </div>
+                            </div>
+                            <div className="w-full bg-indigo-950 dark:bg-black/50 rounded-full h-3 mt-2">
+                                <div 
+                                    className="bg-green-400 h-3 rounded-full transition-all duration-500 ease-out" 
+                                    style={{ width: `${progress}%` }}
+                                />
+                            </div>
+                        </Card>
+
+                        <div className="space-y-2">
+                            {phases.map((phaseTitle) => (
+                                <div key={phaseTitle} className="mb-6">
+                                    <h3 className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3 px-1">{phaseTitle}</h3>
+                                    {T.todos.filter(t => t.phase === phaseTitle).map((todo) => {
+                                        const isDone = completedIds.includes(todo.id);
+                                        return (
+                                            <div 
+                                                key={todo.id}
+                                                onClick={() => toggleTodo(todo.id)}
+                                                className={`
+                                                    group flex items-start gap-4 p-4 mb-3 rounded-xl border-2 cursor-pointer transition-all duration-200
+                                                    ${isDone 
+                                                        ? 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700/50 opacity-60' 
+                                                        : 'bg-white dark:bg-slate-800 border-indigo-100 dark:border-slate-700 hover:border-indigo-400 dark:hover:border-indigo-500 shadow-sm'}
+                                                `}
+                                            >
+                                                <div className={`
+                                                    mt-1 w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors
+                                                    ${isDone ? 'bg-green-500 border-green-500' : 'bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-600 group-hover:border-indigo-400'}
+                                                `}>
+                                                    {isDone && <CheckCircle size={16} className="text-white" />}
+                                                </div>
+                                                <p className={`text-lg font-medium leading-snug select-none ${isDone ? 'line-through text-slate-500 dark:text-slate-500' : 'text-slate-800 dark:text-slate-200'}`}>
+                                                    {todo.text}
+                                                </p>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                );
+            };
 
             return (
                 <div className={isDarkMode ? 'dark' : ''}>
@@ -453,7 +655,7 @@
                                     `}
                                 >
                                     <Zap size={24} className={activeTab === 'guide' ? 'fill-current' : ''} />
-                                    <span className="text-xs font-bold mt-1">Strategy Guide</span>
+                                    <span className="text-xs font-bold mt-1">{T.meta.tabGuide}</span>
                                 </button>
                                 
                                 <button
@@ -472,7 +674,7 @@
                                             </span>
                                         )}
                                     </div>
-                                    <span className="text-xs font-bold mt-1">Checklist</span>
+                                    <span className="text-xs font-bold mt-1">{T.meta.tabCheck}</span>
                                 </button>
                             </div>
                         </div>
